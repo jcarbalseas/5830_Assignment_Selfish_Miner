@@ -102,6 +102,7 @@ def Simulate(alpha, gamma, N, seed):
             # State 0: Selfish pool has 0 hidden blocks
             if r <= alpha:
                 # Selfish miners mine a block and keep it hidden
+                hidden_blocks += 1
                 state = 1
             else:
                 # Honest miners found a block
@@ -112,10 +113,13 @@ def Simulate(alpha, gamma, N, seed):
             # State 1: Selfish pool has 1 hidden block
             if r <= alpha:
                 # Selfish miners found another block, now have 2 hidden
-                hidden_blocks = 2
+                hidden_blocks += 1
                 state = 2
             else:
-                # Selfish miners lose their hidden block to honest miners
+                # Selfish miners publish their hidden block
+                ChainLength += 1
+                SelfishRevenue += hidden_blocks
+                hidden_blocks = 0
                 state = 0
 
         elif state == -1:
@@ -129,31 +133,20 @@ def Simulate(alpha, gamma, N, seed):
                 # Honest miners found a block, selfish miners publish 1 hidden block
                 ChainLength += hidden_blocks
                 SelfishRevenue += hidden_blocks * gamma
-                state = 0
                 hidden_blocks = 0
+                state = 0
             else:
                 # Honest miners found a block, selfish miners lose all hidden blocks
                 ChainLength += hidden_blocks
-                state = 0
                 hidden_blocks = 0
+                state = 0
 
-        elif state == 2:
-            # State 2: Selfish pool has 2 hidden blocks
-            if r <= alpha:
-                # Selfish miners found a block
-                ChainLength += 2
-                SelfishRevenue += 2
-                state = 3
-            else:
-                # Honest miners found a block
-                ChainLength += 2
-                state = 1
-
-        elif state > 2:
+        elif state >= 2:
             if r <= alpha:
                 # Selfish miners found a block
                 ChainLength += state + 1
                 SelfishRevenue += state + 1
+                hidden_blocks += 1
                 state += 1
             else:
                 # Honest miners found a block
@@ -172,4 +165,3 @@ seed = 100
 print("Theoretical probability :", (alpha*(1-alpha)**2*(4*alpha+gamma*(1-2*alpha))-alpha**3)/(1-alpha*(1+(2-alpha)*alpha)))
 print("Simulated probability :", Simulate(alpha, gamma, Nsimu, seed))
 """
-
