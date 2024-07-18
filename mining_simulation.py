@@ -87,7 +87,6 @@
 import random
 
 def Simulate(alpha, gamma, N, seed):
-    
     random.seed(seed)
   
     state = 0        # Initial state
@@ -117,16 +116,15 @@ def Simulate(alpha, gamma, N, seed):
                 state = 2
             else:
                 # Selfish miners lose their hidden block to honest miners
-                state = -1
+                state = 0
 
         elif state == -1:
-            # State 0' (negative one): Eyal and Gun Sirer's paper
+            # State -1: Selfish pool has 0 hidden blocks, honest miners found a block
             if r <= alpha:
-                # Selfish miners found a block, publish all hidden blocks
-                ChainLength += hidden_blocks + 1
-                SelfishRevenue += hidden_blocks + 1
+                # Selfish miners found a block
+                ChainLength += 1
+                SelfishRevenue += 1
                 state = 0
-                hidden_blocks = 0
             elif r <= alpha + (1 - alpha) * gamma:
                 # Honest miners found a block, selfish miners publish 1 hidden block
                 ChainLength += hidden_blocks
@@ -143,8 +141,8 @@ def Simulate(alpha, gamma, N, seed):
             # State 2: Selfish pool has 2 hidden blocks
             if r <= alpha:
                 # Selfish miners found a block
-                ChainLength += 3
-                SelfishRevenue += 3
+                ChainLength += 2
+                SelfishRevenue += 2
                 state = 3
             else:
                 # Honest miners found a block
@@ -174,3 +172,4 @@ seed = 100
 print("Theoretical probability :", (alpha*(1-alpha)**2*(4*alpha+gamma*(1-2*alpha))-alpha**3)/(1-alpha*(1+(2-alpha)*alpha)))
 print("Simulated probability :", Simulate(alpha, gamma, Nsimu, seed))
 """
+
